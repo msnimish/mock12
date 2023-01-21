@@ -7,8 +7,8 @@ user.post("/register", register);
 user.post("/login", login);
 
 user.get('/', getAllUsers);
-user.get('/getProfile/:id', getProfile);
-user.patch("/calc/:id", calculate);
+user.get('/getProfile', getProfile);
+user.patch("/calc", calculate);
 
 
 

@@ -1,5 +1,9 @@
 import User from "../model/user.model.js";
 import jwt from "jsonwebtoken";
+import dotenv from "dotenv";
+
+dotenv.config();
+
 
 
 export const register = async (req,res) => {
@@ -8,7 +12,7 @@ export const register = async (req,res) => {
         // console.log(req.body);
         let user = await User.findOne({email:email});
         // console.log(user);
-        if(user.email){
+        if(user&&user.email){
             return res.status(400).json({message:"User already exists"});
         }else{
             let newUser = new User({
@@ -57,8 +61,10 @@ export const getAllUsers = async (req,res) => {
 
 export const getProfile = async (req,res) => {
     try{
-        console.log(req.params);
-        let user = await User.findById(req.params.id);
+        let token = req.headers.authorization.split(" ")[1];
+        let decoded = jwt.verify(token,process.env.JWT_SECRET);
+        console.log(decoded)
+        let user = await User.findById(decoded._id);
         console.log(user);
         if(!user){
             res.status(400).json({message:"User not found"});
@@ -74,20 +80,19 @@ export const getProfile = async (req,res) => {
 
 export const calculate = async(req,res) => {
     try{
-        let data = await User.findById({_id:req.params.id});
-        if(!req.body.interestRate || !req.body.years || !req.body.installmentAmt){
-            res.status(400).json({message:"Incomplete data"});
-        }else{
-            data.interestRate = req.body.interestRate;
-            data.installmentAmt = req.body.installmentAmt;
-            data.years = req.body.years;
-            data.interestRate = data.interestRate/100;
-            data.maturityValue = data.installmentAmt*((((1+data.interestRate)**data.years)-1)/data.interestRate);
-            data.investmentAmt = data.installmentAmt*data.years;
-            data.interestAmt = data.maturityValue-data.investmentAmt;
-            await data.save();
-            res.status(200).send(data);
-        }
+        let token = req.headers.authorization.split(" ")[1];
+        let decoded = jwt.verify(token,process.env.JWT_SECRET);
+        // console.log(decoded)
+        let data = await User.findById(decoded._id);
+        data.interestRate = req.body.interestRate;
+        data.installmentAmt = req.body.installmentAmt;
+        data.years = req.body.years;
+        data.interestRate = data.interestRate/100;
+        data.maturityValue = data.installmentAmt*((((1+data.interestRate)**data.years)-1)/data.interestRate);
+        data.investmentAmt = data.installmentAmt*data.years;
+        data.interestAmt = data.maturityValue-data.investmentAmt;
+        await data.save();
+        res.status(200).send(data);
     }catch(err){
         console.log(err);
         res.status(500).send({message:"Something went wrong in calculate API"});

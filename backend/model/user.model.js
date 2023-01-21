@@ -10,7 +10,8 @@ let UserSchema = mongoose.Schema({
     investmentAmt: { type: "Number"},
     interestAmt: {  type: "Number"},
     maturityValue: { type: "Number"}
-})
+}, {timestamps: true});
+
 
 let User = mongoose.model("user", UserSchema);
 
