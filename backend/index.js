@@ -2,6 +2,8 @@ import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
 import connection from "./config/db.js";
+import user from "./routes/user.route.js";
+
 
 dotenv.config();
 connection();
@@ -9,6 +11,9 @@ connection();
 let app = express();
 app.use(cors());
 app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
+app.use("/user", user);
+
 
 
 
